@@ -12,7 +12,7 @@ const Get_GemShapes = async()=>{
     catch(error){   
         console.log(error.message);
         
-        return error
+        throw error
     }
 }
 

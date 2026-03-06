@@ -19,7 +19,7 @@ const Get_ThreeFilter_Count = async (gem_id,shape_id,color_id,crt) => {
     }
     catch(error){
          console.log("error in three filter service - api gateway ",error);
-         return error;
+         throw error;
     }
 }
 

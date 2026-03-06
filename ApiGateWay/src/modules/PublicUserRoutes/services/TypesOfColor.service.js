@@ -11,7 +11,7 @@ const Get_GemColorTypes = async()=>{
     }
     catch(error){   
         console.log("Error color type service - api gateway");
-        return error;
+        throw error;
         
     }
 }

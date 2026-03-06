@@ -12,7 +12,7 @@ try{
 }
 catch(error){
     console.log("error in each gem detail based on ID ,",error.message);
-    return error;
+    throw error;
     
 }
     

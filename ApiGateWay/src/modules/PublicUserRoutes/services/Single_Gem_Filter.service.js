@@ -22,7 +22,7 @@ const Get_Gem_SingleFinal = async(category,gem_id,page,limit,filter,value) =>{
         catch(error){
             console.log("Error in single Filter API gateway - .service",error.message);
             
-            return error;
+            throw error;
         }
 }   
 

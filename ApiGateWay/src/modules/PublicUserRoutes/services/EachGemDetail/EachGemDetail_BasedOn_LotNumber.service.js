@@ -10,7 +10,7 @@ const Get_GemDetailOnLotNumber = async (lot_number) => {
     }
     catch(error){
 
-        return error;
+        throw error;
     }
 }
 

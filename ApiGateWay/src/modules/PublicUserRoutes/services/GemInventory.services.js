@@ -17,7 +17,7 @@ const Get_Gem_List = async(gem_id,category,page,limit) =>{
         }
         catch(error){
             console.log('Error in API gateway service ',error);   
-            return error;
+            throw error;
         }
 }
 

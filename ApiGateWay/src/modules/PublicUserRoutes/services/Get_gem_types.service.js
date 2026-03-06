@@ -9,10 +9,11 @@ const getGem = async()=>{
     }
     catch(e){
         console.log("error in .service.js file ",e);
+      
+        throw "Something is wrong!!";
         
     }
-    console.log("req received");
-    return "Something is wrong!!";
+    
 }
 
 export default {getGem}

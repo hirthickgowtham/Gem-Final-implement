@@ -19,7 +19,7 @@ const Get_Gem_DoubleFilter = async(gem_id,filter1,filter2,page,limit,value1,valu
         }
         catch(error){
             console.log("Error in Double Filter service ",error.message);
-            return error;
+            throw error;
         }
 }
 

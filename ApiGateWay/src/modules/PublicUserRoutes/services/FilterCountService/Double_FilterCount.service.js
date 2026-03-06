@@ -17,7 +17,7 @@ const Get_DoubleFilter_Count = async(gem_id,filter1,filter2,value1,value2)=>{
         }
         catch(error){
              console.log("error in double filter count service - api gateway ",error);
-             return error
+             throw error
         }
 }
 

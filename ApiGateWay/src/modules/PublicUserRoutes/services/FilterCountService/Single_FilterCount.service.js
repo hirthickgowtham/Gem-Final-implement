@@ -20,7 +20,7 @@ const Get_SingleFilter_Count = async (gem_id,category,filter,value) => {
     }
     catch(error){
         console.log("Error in Single Filter Count service - API gateway ",error);
-        return error;
+        throw error;
         
     }
 }
