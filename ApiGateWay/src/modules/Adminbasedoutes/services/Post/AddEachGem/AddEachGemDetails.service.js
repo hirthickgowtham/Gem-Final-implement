@@ -1,10 +1,11 @@
 import axios from "axios";
 
 
-const AddNewGem = async (gemDetails) => {
+const AddNewEachGem = async (gemDetails) => {
     try{
+      console.log(`Service route ${process.env.MICRO_SERVICE_1_URL}/api/edit/add_each_gem`);
         const result = await axios.post(
-      `${process.env.MICRO_SERVICE_1_URL}/api/edit/add_gem`,
+      `${process.env.MICRO_SERVICE_1_URL}/api/edit/add_each_gem`,
       gemDetails, // ✅ send body
       {
         headers: {
@@ -24,4 +25,4 @@ const AddNewGem = async (gemDetails) => {
     
 }
 
-export{AddNewGem}
+export{AddNewEachGem}

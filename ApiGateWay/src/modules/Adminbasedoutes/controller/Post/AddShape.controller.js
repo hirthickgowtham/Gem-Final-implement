@@ -1,4 +1,4 @@
-import AddShape_Service from "../services/AddShape.service.js"
+import AddShape_Service from "../../services/Post/AddShape.service.js";
 
 const AddShape = async(req,res)=>{
     try{

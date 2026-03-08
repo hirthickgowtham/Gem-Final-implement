@@ -1,21 +1,36 @@
 import multer from "multer";
+import path from "path";
 
-// Memory storage (can switch to S3 later)
 const storage = multer.memoryStorage();
 
-// Allowed MIME types
 const allowedTypes = [
   "image/jpeg",
   "image/png",
   "image/webp",
+  "image/vnd.microsoft.icon",
+  "image/x-icon",
   "video/mp4",
-  "application/pdf",
-   "image/vnd.microsoft.icon"
+  "application/pdf"
 ];
 
-// File filter for security
+const allowedExtensions = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".mp4",
+  ".pdf",
+  ".ico"
+];
+
 const fileFilter = (req, file, cb) => {
-  if (allowedTypes.includes(file.mimetype)) {
+
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (
+    allowedTypes.includes(file.mimetype) &&
+    allowedExtensions.includes(ext)
+  ) {
     cb(null, true);
   } else {
     cb(new Error(`Invalid file type: ${file.mimetype}`), false);
@@ -25,14 +40,9 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB per file
+    fileSize: 50 * 1024 * 1024
   },
   fileFilter
 });
 
-// 🔹 Limit file counts here
-export const uploadGemFiles = upload.fields([
-  { name: "images", maxCount: 10 }, // max 10 images
-  { name: "video", maxCount: 1 },   // 1 video only
-  { name: "pdf", maxCount: 1 }      // 1 pdf only
-]);
+export const uploadGemFiles = upload.array("files", 12);
