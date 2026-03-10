@@ -8,13 +8,12 @@ const app = require('./config/app.config'); // import app configuration
 const loadEnv = require('./load/env.load');
 const { loadDB } = require('./load/db.load');
 const connectRedis = require('./load/redis.load');
-const { AWSLoad } = require('./load/AWS.load');
+
 
 // load functions calls
 
 loadEnv(); // check and load environment variables
 loadDB(); // check database connection
-// AWSLoad(); // check AWS connection
 connectRedis(); // connect to Redis
 
 const port = process.env.PORT || 4000;

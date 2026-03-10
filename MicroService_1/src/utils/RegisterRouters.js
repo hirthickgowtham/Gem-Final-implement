@@ -8,5 +8,6 @@ module.exports = (app) => {
     app.use('/api/helper', require('../modules/HelperRoutes/routes/HelperRoutes.routes'));  // Register HelperRoutes routes
     app.use('/api/each_gem_detail', require('../modules/EachGemDetail/routes/EachGemDetail.routes'));  // Register EachGemDetail routes
     app.use('/api/edit', require('../modules/GemDetailEdit/routes/GemDetailEdit.routes')) // Register GemDetailEdit routes
+    app.use('/api/hero_section', require('../modules/HeroSection/routes/HeroSection.routes'))
 
 };

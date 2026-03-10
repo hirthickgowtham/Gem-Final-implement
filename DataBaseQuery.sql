@@ -111,6 +111,16 @@ CREATE TABLE thumbnail (
         ON DELETE CASCADE
 );
 
+
+-- creating hero_section table to handle hero_section images
+
+CREATE TABLE hero_section (
+    id SERIAL PRIMARY KEY,
+    title TEXT,
+    description TEXT,
+    image_url TEXT NOT NULL
+);
+
 -- Core filtering
 CREATE INDEX idx_egd_gem_category
 ON each_gem_detail (gem_id, category);
