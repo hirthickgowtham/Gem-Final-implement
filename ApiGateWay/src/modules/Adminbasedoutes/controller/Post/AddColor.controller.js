@@ -1,4 +1,4 @@
-import AddColor_Service from "../services/AddColor.service.js";
+import AddColor_Service from "../../services/Post/AddColor.service.js";
 
 const AddColor = async(req,res)=>{
     try{

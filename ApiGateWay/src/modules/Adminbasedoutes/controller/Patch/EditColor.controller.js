@@ -1,4 +1,4 @@
-import Edit_Color_Service from "../services/EditColor.service.js"
+import Edit_Color_Service from "../../services/Patch/EditColor.service.js"
 
 const Edit_Color = async(req,res)=>{
     try{
