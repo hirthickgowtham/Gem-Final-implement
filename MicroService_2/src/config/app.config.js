@@ -1,5 +1,5 @@
 const express = require('express'); // import express module
-const routeRegister = require("../utils/registerRouters") // import route registration utility
+const routeRegister = require("../utils/RegisterRouters") // import route registration utility
 
 
 const app = express(); // create an express application instance
