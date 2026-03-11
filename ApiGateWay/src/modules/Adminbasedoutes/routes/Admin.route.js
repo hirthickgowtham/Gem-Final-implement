@@ -14,10 +14,13 @@ import AddShapeController from "../controller/Post/AddShape.controller.js"
 import AddColorController from "../controller/Post/AddColor.controller.js";
 import AddGemController from "../controller/Post/AddGem.controller.js";
 import AddEachGemThumNailController from "../controller/Post/AddEachGemThumNail.controller.js";
+import AddHeroSectionContoller from "../controller/Post/AddHeroSection.contoller.js";
 
 import EditShapeController from "../controller/Patch/EditShape.controller.js";
 import EditColorController from "../controller/Patch/EditColor.controller.js";
 import EditEachGemDetailsController from "../controller/Patch/EditEachGemDetails.controller.js";
+import EditHeroSectionController from "../controller/Patch/EditHeroSection.controller.js";
+import EditGemDetailsController from "../controller/Patch/EditGemDetails.controller.js";
 
 
 import RemoveEachGemController from "../controller/Delete/RemoveSpecificGem.controller.js";
@@ -26,6 +29,7 @@ import RemoveColorController from "../controller/Delete/RemoveColor.controller.j
 import RemoveGemTypeController from "../controller/Delete/RemoveGemType.controller.js";
 import RemoveEachGemMediaController from "../controller/Delete/RemoveEachGemMedia.controller.js";
 import RemoveEachGemThumNailController from "../controller/Delete/RemoveEachGemThumNail.controller.js";
+import RemoveHeroSectionController from "../controller/Delete/RemoveHeroSection.controller.js";
 
 
 const route = express.Router();
@@ -38,6 +42,7 @@ route.post("/add-shape",AddShapeController.AddShape);
 route.post("/add-color",AddColorController.AddColor);
 route.post("/add-gem",uploadGemFiles,AddGemController.AddGem);
 route.post("/add-each-gem-thumbnail",uploadGemFiles,AddEachGemThumNailController.AddEachGemThumNail);
+route.post("/add-hero-section",upload.single("image"),AddHeroSectionContoller.AddHeroSection);
 //Still Add Gem file upload is pending 
 
 
@@ -45,10 +50,14 @@ route.patch("/edit-shape",EditShapeController.Edit_Shape)
 route.patch("/edit-color",EditColorController.Edit_Color)
 
 //TO handle image for edit each gem details route and edit gem detail route
-route.patch("/edit-each-gem-details",uploadGemFiles,EditEachGemDetailsController.Edit_Each_Gem_Details)
+route.patch("/edit-each-gem-details",upload.single("file"),EditEachGemDetailsController.Edit_Each_Gem_Details)
+route.patch("/edit-gem-details",upload.single("image"),EditGemDetailsController.Edit_Gem_Details)
 
 //Each Gem detail edit is pending in point of file recieving and handling
 // Gem Type edit is pending
+
+route.patch("/edit-hero-section",upload.single("image"),EditHeroSectionController.EditHeroSection)
+
 
 
 //All delete routes are pending
@@ -58,6 +67,7 @@ route.delete("/remove-color",RemoveColorController.RemoveColor);
 route.delete("/remove-gem-type",RemoveGemTypeController.RemoveGemType)
 route.delete("/remove-each-gem-media",RemoveEachGemMediaController.RemoveEachGemMedia)
 route.delete("/remove-each-gem-thumbnail",RemoveEachGemThumNailController.RemoveEachGemThumNail)
+route.delete("/remove-hero-section",RemoveHeroSectionController.RemoveHeroSection)
 
 
 route.post("/check",upload.single("image"),async(req,res)=>{
