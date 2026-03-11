@@ -6,7 +6,13 @@ const RemoveShapeService = async(shape_id)=>{
             data:{
                 shape_id
             }
-        })
+        },
+        {
+            headers:{
+                "Content-Type":"application/json"
+            }
+        }
+    )
         return response.data;
     } catch (error) {
         console.error("Error in RemoveShapeService:", error);

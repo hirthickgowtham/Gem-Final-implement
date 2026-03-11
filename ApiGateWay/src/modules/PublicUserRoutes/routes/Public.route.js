@@ -19,6 +19,8 @@ import Get_Colortypes from "../controller/TypesOfColor.controller.js"
 import Get_EachGemDetailOnID from "../controller/EachGemDetail/EachGemDetail_BasedOn_id.controller.js"
 import Get_EachGemDetailOnLotNumber from "../controller/EachGemDetail/EachGemDetail_BasedOn_LotNumber.controller.js"
 
+import Get_HeroSection from "../controller/HeroSection/GetHeroSection.controller.js"
+
 
 //Get Gem Types
 route.get("/get_gem_types",Get_gem_type_controller.gem_types)
@@ -41,6 +43,10 @@ route.get("/color_types",Get_Colortypes.Gem_ColorTypes)
 //Get Each Gem details based on each_gem_id and lot number 
 route.get("/each_gem_detail/based_on_id/:each_gem_id",Get_EachGemDetailOnID.GemDetail_id)
 route.get("/each_gem_detail/based_on_lot_number/:lot_number",Get_EachGemDetailOnLotNumber.GemDetailOnLotNumber)
+
+route.get("/hero-section",Get_HeroSection.GetHeroSection)
+
+
 
 
 export default route;
