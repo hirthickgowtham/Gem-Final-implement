@@ -2,7 +2,7 @@ import axios from "axios"
 
 const Get_GemShapes = async()=>{
     try{
-        const result = await axios.get(`${process.env.MICRO_SERVICE_1_URL}/api/helper/color_type`);
+        const result = await axios.get(`${process.env.MICRO_SERVICE_1_URL}/api/helper/shape_type`);
 
         console.log("check in service for shapes");
 
