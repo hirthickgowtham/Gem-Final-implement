@@ -4,8 +4,6 @@ import RandomName from "../../../../utils/RandomName.js";
 import UploadMediaFilesAws from "../../../../utils/MediaFilesAws/UploadMediaFilesAws.js";
 
 const AddEachGem = async(req, res) => {
-
-
  console.log(req.files.length)
 
  const formattedFiles = req.files.map(file => ({
@@ -14,7 +12,7 @@ const AddEachGem = async(req, res) => {
   buffer: file.buffer
 }));
 
-// console.log(formattedFiles); 
+console.log(formattedFiles); 
  
 try{
   //gem details from req body

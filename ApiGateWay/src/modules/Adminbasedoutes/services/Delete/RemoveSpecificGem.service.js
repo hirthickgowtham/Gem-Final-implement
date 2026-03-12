@@ -12,7 +12,7 @@ const RemoveEachGemService = async (each_gem_id) => {
                 "Content-Type": "application/json"
             }
         });
-        console.log("Response from RemoveEachGemService:", response.data);  
+        console.log("Response from RemoveEachGemService:", response);  
         return response.data;
     } catch (error) {
         console.error("Error in RemoveEachGemService:", error);

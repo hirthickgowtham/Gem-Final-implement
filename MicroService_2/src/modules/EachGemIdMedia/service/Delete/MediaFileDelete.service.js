@@ -5,7 +5,7 @@ const MediaFileDeleteService = async (media_ids) => {
     const query = `
         DELETE FROM media_table
         WHERE media_id = ANY($1::int[])
-        RETURNING media_id;
+        RETURNING *;
     `;
 
     const {rows} = await pool.query(query,[media_ids]);

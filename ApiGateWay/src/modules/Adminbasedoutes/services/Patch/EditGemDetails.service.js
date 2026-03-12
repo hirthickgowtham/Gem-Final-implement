@@ -16,7 +16,7 @@ const EditGemDetailsService = async(Gemdetails)=>{
     }
     catch(error){
         console.error("Error in EditGemDetailsService:",error);
-        throw new Error("Failed to edit gem details in EditGemDetailsService")
+        throw new Error("Failed to edit gem details in EditGemDetailsService", error)
     }
 }
 

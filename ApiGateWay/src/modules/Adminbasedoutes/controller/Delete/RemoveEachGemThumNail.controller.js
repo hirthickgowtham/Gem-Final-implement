@@ -3,19 +3,21 @@ import RemoveEachGemThumNailService from "../../services/Delete/RemoveEachGemThu
 
 const RemoveEachGemThumNail = async(req,res)=>{
     try {
-        const {each_gem_id,media_url} = req.body;
+        const {each_gem_id} = req.body;
         if(!each_gem_id){
             return res.status(400).json({message:"Each Gem Id is required"})
         }   
         // Call the service function to remove the thumbnail
 
-        console.log(each_gem_id,media_url);
+        console.log(each_gem_id);
 
-        const response = await DeleteMediaFilesAws(media_url);
-        console.log("AWS delete response:", response);
+        
 
         const data = await RemoveEachGemThumNailService(each_gem_id);
-        console.log("Controller response:", data);
+        console.log("Controller response:", data.data.image);
+        const media_to_remove = data.data.image;
+        const response = await DeleteMediaFilesAws(media_to_remove);
+        console.log("AWS delete response:", response);
         return res.status(200).json({
             message:"Data recevied",
             data
