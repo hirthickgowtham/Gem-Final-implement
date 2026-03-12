@@ -6,7 +6,7 @@ const AddNewGemController = async (req, res) => {
             const gemDetails = req.body;
 
             const result = await AddNewGemService(gemDetails);
-
+            
             return sendResponse(res, 201, true, "Gem added successfully", result);
             
         } catch (error) {

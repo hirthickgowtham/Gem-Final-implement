@@ -1,6 +1,6 @@
 const pool = require('../../../../config/db.config');
 
-const AddNewGemService = async ({gem_name, gem_division}) => {
+const AddNewGemService = async ({gem_name,gem_division}) => {
     const query = `
         INSERT INTO gem_table (gem_name, division, general_gem_image)
         VALUES ($1, $2, $3)

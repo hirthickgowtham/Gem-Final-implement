@@ -15,6 +15,8 @@ const EachGemIdPostService = async (each_gem_id, mediaArray) => {
         values.push(each_gem_id, item.media_type, item.media_file);
     });
 
+    console.log(values,placeholders)
+
     const query = `
         INSERT INTO media_table (each_gem_id, media_type, media_file)
         VALUES ${placeholders.join(', ')}

@@ -4,8 +4,12 @@ const ThumbnailCheck = require("../../utils/ExistCheck/ThumbnailCheck")
 
 const DeleteThubnailMiddleware = async (req, res, next) =>{
     try {
+        console.log("Delete Thumbnail Middleware called.");
 
+        console.log("Request Body:", req.body);
         const {each_gem_id} = req.body;
+
+        console.log(each_gem_id);
 
         if(!each_gem_id){
             return sendResponse(res, 400, false, "each_gem_id is require");
@@ -24,7 +28,7 @@ const DeleteThubnailMiddleware = async (req, res, next) =>{
         }
 
     } catch (error) {
-        console.error("Error in DeleteThumbnailMiddleware");
+        console.error("Error in DeleteThumbnailMiddleware",error);
         return sendResponse(res, 500, false, "Internal Server Error");
     }
 

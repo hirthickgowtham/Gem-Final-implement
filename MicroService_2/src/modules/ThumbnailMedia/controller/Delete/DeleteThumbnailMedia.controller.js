@@ -4,7 +4,7 @@ const {DeleteThumbnailMediaService} = require("../../service/Delete/DeleteThumbn
 const DeleteThumbnailMediaController = async (req, res) =>{
     try {
 
-        const { each_gem_id} = req.body;
+        const { each_gem_id } = req.body;
 
         console.log(each_gem_id);
 
