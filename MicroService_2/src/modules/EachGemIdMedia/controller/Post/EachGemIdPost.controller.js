@@ -7,6 +7,8 @@ const EachGemIdPostController = async (req, res) =>{
         
         const {each_gem_id, values} = req.body;
 
+        console.log("Each Gem Id Post Controller", {each_gem_id, values});
+
         const result = await EachGemIdPostService(each_gem_id, values);
     
     

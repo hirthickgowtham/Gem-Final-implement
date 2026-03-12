@@ -4,7 +4,7 @@ const { GemDetailEditService } = require('../../service/Patch/GemDetailEdit.serv
 const GemDetailEditController = async (req, res) => {
     try {
         
-        const { gem_id} = req.body;
+        const { gem_id } = req.body;
 
         const result  = await GemDetailEditService(gem_id, req.body);
         
