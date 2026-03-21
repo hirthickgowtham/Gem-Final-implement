@@ -8,11 +8,11 @@ const EditHeroSection = async(req,res)=>{
         
         const {heroUrl} = req.body;
         const image = req.file;
-        if(!id){
+        if(!req.body.HeroId){
             return res.status(400).json({message:"id is required"})
         }
 
-        console.log(id,title,description);
+        // console.log(id,title,description);
         console.log("Hero section edit route hit",heroUrl);
         
         if(image){
