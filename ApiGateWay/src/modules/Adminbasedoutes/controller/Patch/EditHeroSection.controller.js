@@ -5,8 +5,7 @@ import EditHeroSectionService from "../../services/Patch/EditHeroSection.service
 
 const EditHeroSection = async(req,res)=>{
     try {
-        const {id} = req.body;
-        const {title,description} = req.body;
+        
         const {heroUrl} = req.body;
         const image = req.file;
         if(!id){
@@ -33,7 +32,7 @@ const EditHeroSection = async(req,res)=>{
             console.log(response);
         }
 
-        const data = await EditHeroSectionService(id,title,description);
+        const data = await EditHeroSectionService(req.body);
         return res.status(200).json({
             message:"Hero section edited successfully",
             data

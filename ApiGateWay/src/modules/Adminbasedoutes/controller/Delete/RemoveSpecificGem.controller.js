@@ -14,7 +14,8 @@ const RemoveEachGem = async (req,res) => {
 
         const theDetails  = eachGemDetails.data.data[0];
 
-        const media_urls = [
+       if(theDetails?.length > 0){
+         const media_urls = [
             ...theDetails.images.map(img=>img.file),
             theDetails.video.file,
             theDetails.pdf.file
@@ -26,8 +27,7 @@ const RemoveEachGem = async (req,res) => {
             const res = await DeleteMediaFilesAws(file);
             console.log("Deleting media ",res)
         }
-        
-
+       }
         // Call the service function to remove the gem
         const response = await RemoveEachGemService(each_gem_id);
         console.log("RemoveEachGem controller response:", response);
