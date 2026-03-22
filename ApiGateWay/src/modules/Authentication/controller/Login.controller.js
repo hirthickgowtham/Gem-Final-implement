@@ -25,16 +25,9 @@ const Admin_Login = async (req, res) => {
             { expiresIn: "1h" }
         );
 
-        // ✅ Send as cookie
-        res.cookie("adminToken", token, {
-            httpOnly: true,        // JS cannot access it
-            secure: false,         // true in production (HTTPS)
-            sameSite: "strict",    // CSRF protection
-            maxAge: 60 * 60 * 1000 // 1 hour
-        });
-
         return res.status(200).json({
-            message: "Login success"
+            message: "Login success",
+            token
         });
 
     } catch (error) {
