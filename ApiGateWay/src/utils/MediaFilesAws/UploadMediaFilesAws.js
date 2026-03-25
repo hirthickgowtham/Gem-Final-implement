@@ -8,7 +8,8 @@ const UploadMediaFilesAws = async (file_type,file_name,buffer) =>{
             Bucket: process.env.BUCKET_NAME,
             Key: `${file_name}`,
             Body: buffer,
-            ContentType: file_type
+            ContentType: file_type,
+            CacheControl: "no-cache, no-store, must-revalidate"
         };
         const command = new PutObjectCommand(params);
         return await s3.send(command);
