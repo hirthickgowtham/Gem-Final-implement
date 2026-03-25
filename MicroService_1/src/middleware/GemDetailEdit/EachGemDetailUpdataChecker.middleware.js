@@ -47,7 +47,7 @@ const validationChecker = async (req, res, next) => {
         if(gemDetails.lot_number){
             const IsLotNumberExist = await LotNumberCheck(gemDetails.lot_number);
 
-            if(IsLotNumberExist){
+            if(!IsLotNumberExist){
                 return sendResponse(res, 400, false, "Invalid lot_number provided");
             }
         }
