@@ -4,6 +4,7 @@ import DeleteMediaFilesAws from "../../../utils/MediaFilesAws/DeleteMediaFilesAw
 import multer from "multer";
 import RandomName from "../../../utils/RandomName.js";
 import UploadMediaFilesAws from "../../../utils/MediaFilesAws/UploadMediaFilesAws.js";
+import {updategemFiles} from "../../../middleware/Multerfields.middleware.js"
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -50,7 +51,7 @@ route.patch("/edit-shape",EditShapeController.Edit_Shape)
 route.patch("/edit-color",EditColorController.Edit_Color)
 
 //TO handle image for edit each gem details route and edit gem detail route
-route.patch("/edit-each-gem-details",upload.single("file"),EditEachGemDetailsController.Edit_Each_Gem_Details)
+route.patch("/edit-each-gem-details",updategemFiles,EditEachGemDetailsController.Edit_Each_Gem_Details)
 route.patch("/edit-gem-details",upload.single("image"),EditGemDetailsController.Edit_Gem_Details)
 
 //Each Gem detail edit is pending in point of file recieving and handling
