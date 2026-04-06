@@ -16,6 +16,7 @@ import AddColorController from "../controller/Post/AddColor.controller.js";
 import AddGemController from "../controller/Post/AddGem.controller.js";
 import AddEachGemThumNailController from "../controller/Post/AddEachGemThumNail.controller.js";
 import AddHeroSectionContoller from "../controller/Post/AddHeroSection.contoller.js";
+import AddEachGemMediaController from "../controller/Post/AddEachGemMedia.controller.js";
 
 import EditShapeController from "../controller/Patch/EditShape.controller.js";
 import EditColorController from "../controller/Patch/EditColor.controller.js";
@@ -44,6 +45,7 @@ route.post("/add-color",AddColorController.AddColor);
 route.post("/add-gem",uploadGemFiles,AddGemController.AddGem);
 route.post("/add-each-gem-thumbnail",uploadGemFiles,AddEachGemThumNailController.AddEachGemThumNail);
 route.post("/add-hero-section",upload.single("image"),AddHeroSectionContoller.AddHeroSection);
+route.post("/add-each-gem-media",uploadGemFiles,AddEachGemMediaController);
 //Still Add Gem file upload is pending 
 
 
