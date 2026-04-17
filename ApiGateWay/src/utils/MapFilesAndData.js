@@ -1,26 +1,19 @@
-const mapFilesForUpload = (fileData, files) => {
-  const result = [];
+// utils/MapFilesAndData.js
+import RandomName from "./RandomName.js";
 
-  Object.keys(fileData).forEach((type) => {
-    const keys = fileData[type];     // old S3 keys
-    const uploadedFiles = files[type] || [];
+const MapFilesAndData = (fileDataArray = [], filesArray = []) => {
+  return fileDataArray.map((item, index) => {
+    const file = filesArray[index];
 
-    keys.forEach((key, index) => {
-      const file = uploadedFiles[index];
+    if (!file) return null;
 
-      if (!file) {
-        throw new Error(`${type} file missing at index ${index}`);
-      }
-
-      result.push({
-        key, // old S3 key (replace file)
-        buffer: file.buffer,
-        mimetype: file.mimetype
-      });
-    });
-  });
-
-  return result;
+    return {
+      media_id: item.media_id,
+      new_key: RandomName(), // make sure this exists or import it
+      file_type: file.mimetype,
+      buffer: file.buffer
+    };
+  }).filter(Boolean);
 };
 
-export default {mapFilesForUpload};
+export {MapFilesAndData};
