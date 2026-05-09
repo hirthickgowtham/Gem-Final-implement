@@ -4,7 +4,8 @@ const HeroSectionPatchService = async (payload) =>{
 
     const allowedFields = [
         'title',
-        'description'
+        'description',
+        'image_url'
     ];
 
     const keys = Object.keys(payload).filter(k =>
