@@ -26,7 +26,7 @@ const validationChecker = (req, res, next) => {
 
 const variableChecker = (gemDetails) => {
     const { lot_number, crt, number_of_gems, gem_id, category, color_id, shape_id, description } = gemDetails;
-    if (!lot_number || !crt || !number_of_gems || !gem_id || !category || !color_id || !shape_id || !description) {
+    if (!lot_number || !crt || !number_of_gems || !gem_id || !category || !description) {
         return false;
     }
 

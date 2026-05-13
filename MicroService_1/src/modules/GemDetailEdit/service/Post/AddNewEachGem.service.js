@@ -24,8 +24,8 @@ const AddNewGemService = async (gemDetails) => {
         Number(gemDetails.number_of_gems),
         Number(gemDetails.gem_id),
         Number(gemDetails.category),
-        Number(gemDetails.color_id),
-        Number(gemDetails.shape_id),
+        gemDetails.color_id ? Number(gemDetails.color_id) : null,
+        gemDetails.shape_id ? Number(gemDetails.shape_id) : null,
         gemDetails.description
     ];
 
