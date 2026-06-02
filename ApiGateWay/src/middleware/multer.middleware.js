@@ -10,7 +10,14 @@ const allowedTypes = [
   "image/vnd.microsoft.icon",
   "image/x-icon",
   "video/mp4",
-  "application/pdf"
+  "application/pdf",
+  "video/quicktime",
+  "video/x-matroska",
+  "video/x-msvideo",
+  "video/webm",
+  "video/mpeg",
+  "video/ogg",
+  "video/3gpp"
 ];
 
 const allowedExtensions = [
@@ -20,7 +27,14 @@ const allowedExtensions = [
   ".webp",
   ".mp4",
   ".pdf",
-  ".ico"
+  ".ico",
+  ".mov",
+  ".mkv",
+  ".avi",
+  ".webm",
+  ".mpeg",
+  ".ogg",
+  ".3gp"
 ];
 
 const fileFilter = (req, file, cb) => {
