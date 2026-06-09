@@ -5,6 +5,11 @@ import UploadMediaFilesAws from "../../../../utils/MediaFilesAws/UploadMediaFile
 import { compressVideo } from "../../../../utils/VideoCompressor.js"; // Adjust path as needed
 import { imagesToPdf } from "../../../../utils/ImageToPdf.js";
 
+import fs from "fs";
+import path from "path";
+import { v4 as uuidv4 } from 'uuid';
+import {convertAndCompressToMp4} from "../../../../utils/VideoConverterAndCompress.js"
+
 const AddEachGem = async (req, res) => {
   try {
     console.log("Files received:", req.files.length);
@@ -26,34 +31,64 @@ const AddEachGem = async (req, res) => {
       console.log("Size after PDF conversion:", (certificateFile.buffer.length / 1024).toFixed(2), "KB");
     }
 
-    // 1. COMPRESSION STEP: Process videos before formatting
-    // We update the buffers in the original req.files array if they are MP4s
+   // 1. CONVERSION & COMPRESSION STEP
     for (const file of req.files) {
-      if (file.mimetype === "video/mp4") {
-
+      if (file.mimetype.startsWith("video/")) {
+        console.log(`--- Processing Video: ${file.originalname} ---`);
         const sizeBeforeMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-        console.log(`--- Video Processing: ${file.originalname} ---`);
-        console.log(`Size before compression: ${sizeBeforeMB} MB`);
-        try {
-          const compressedBuffer = await compressVideo(file.buffer);
+        console.log(`Size before processing: ${sizeBeforeMB} MB`);
 
-          const sizeAfterMB = (compressedBuffer.length / (1024 * 1024)).toFixed(2);
-          const savings = (((file.buffer.length - compressedBuffer.length) / file.buffer.length) * 100).toFixed(1);
+        if (file.mimetype !== "video/mp4") {
+          // CASE A: Video needs conversion AND compression
+          console.log(`Converting and compressing ${file.originalname} to MP4...`);
 
-          console.log(`Size after compression: ${sizeAfterMB} MB`);
-          console.log(`Reduced by: ${savings}%`);
+          const uploadDir = './uploads';
+          // FIX 1: Ensure the directory exists before writing to it
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
 
+          const tempInputPath = path.join('./uploads', `temp_${uuidv4()}${path.extname(file.originalname)}`);
+          fs.writeFileSync(tempInputPath, file.buffer);
+          const outputDir = './converted';
 
-          file.buffer = compressedBuffer;
-          file.size = compressedBuffer.length;
-          console.log(`Compression successful for ${file.originalname}`);
-        } catch (compressionError) {
-          console.error(`Failed to compress ${file.originalname}, uploading original.`, compressionError);
-          return res.status(500).json({
-            message: `Failed to compress video ${file.originalname}. Please try again later.`,
-            status: false
-          });
-          // If compression fails, we just continue with the original buffer
+          try {
+            // Run combined optimization utility
+            const result = await convertAndCompressToMp4(tempInputPath, outputDir);
+            
+            // CRITICAL FIXES: Update the file references in req.files array
+
+            console.log("return result:", result);
+            file.buffer = result.buffer;
+            file.size = result.buffer.length;
+            file.mimetype = "video/mp4"; // Correcting type for AWS S3 mapping
+            file.originalname = result.fileName;
+
+            const sizeAfterMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
+            console.log(`Conversion/Compression complete. New Size: ${sizeAfterMB} MB`);
+
+          } catch (error) {
+            console.error(`Failed to process non-MP4 video ${file.originalname}:`, error);
+            return res.status(500).json({ status: false, message: `Processing error on ${file.originalname}` });
+          } finally {
+            if (fs.existsSync(tempInputPath)) fs.unlinkSync(tempInputPath);
+          }
+
+        } else {
+          // CASE B: Video is already an MP4. Just run standard compression.
+          console.log(`Video is already MP4. Running standard compression on ${file.originalname}...`);
+          try {
+            const compressedBuffer = await compressVideo(file.buffer);
+            
+            file.buffer = compressedBuffer;
+            file.size = compressedBuffer.length;
+            
+            const sizeAfterMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
+            console.log(`Compression successful. New Size: ${sizeAfterMB} MB`);
+          } catch (compressionError) {
+            console.error(`Failed to compress native MP4 ${file.originalname}`, compressionError);
+            return res.status(500).json({ status: false, message: "Compression failure." });
+          }
         }
       }
     }
@@ -110,8 +145,11 @@ const AddEachGem = async (req, res) => {
 
   } catch (error) {
     console.log("Error in AddEachGem controller:", error);
+
+    const errorMessage = error.response?.data?.message || error.message || "Internal Server Error";
+    
     return res.status(500).json({
-      message: error.response.data.message,
+      message: errorMessage,
       status: false
     });
   }
