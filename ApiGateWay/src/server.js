@@ -14,7 +14,10 @@ AWSLoad();
 
 const PORT = process.env.PORT;
 
-app.listen(PORT,()=>{
-    console.log(`Server runing on port ${PORT}`);
-    
-})
+
+const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+
+server.timeout = 600000;
