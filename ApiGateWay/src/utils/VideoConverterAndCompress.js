@@ -15,6 +15,8 @@ export function convertAndCompressToMp4(inputPath, outputDir) {
     const outputFilename = `${fileBaseName}_${Date.now()}.mp4`;
     const outputPath = path.join(outputDir, outputFilename);
 
+    const stderrLines = [];
+
     // Using raw command options to force absolute control over FFmpeg layout ordering
     ffmpeg(inputPath)
       .outputOptions([
@@ -25,9 +27,13 @@ export function convertAndCompressToMp4(inputPath, outputDir) {
         '-crf 28',           // Compress the video track on the fly
         '-preset faster',    // Maintain quick backend thread processing
         '-ignore_unknown',   // Crucial: Tell the global decoder engine to overlook stream #0:2
-        '-map_metadata -1'   // Drop the faulty Apple data envelope
+        '-map_metadata -1',  // Drop the faulty Apple data envelope
+        '-threads 4'
       ])
       .toFormat('mp4')
+      .on('stderr', (line) => {
+        stderrLines.push(line);
+      })
       .on('end', () => {
         try {
           const compressedBuffer = fs.readFileSync(outputPath);
@@ -43,6 +49,14 @@ export function convertAndCompressToMp4(inputPath, outputDir) {
         }
       })
       .on('error', (err) => {
+        console.error("FFmpeg error output:\n", stderrLines.slice(-15).join('\n'));
+        if (fs.existsSync(outputPath)) {
+          try {
+            fs.unlinkSync(outputPath);
+          } catch (unlinkError) {
+            console.error("Failed to clean up output path on error:", unlinkError);
+          }
+        }
         reject(new Error(`FFmpeg error: ${err.message}`));
       })
       .save(outputPath);

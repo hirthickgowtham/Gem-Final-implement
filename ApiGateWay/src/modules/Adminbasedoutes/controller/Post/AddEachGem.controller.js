@@ -2,13 +2,10 @@ import { AddNewEachGem } from "../../services/Post/AddEachGem/AddEachGemDetails.
 import AddEachGemMedia from "../../services/Post/AddEachGem/AddEachGemMedia.service.js";
 import RandomName from "../../../../utils/RandomName.js";
 import UploadMediaFilesAws from "../../../../utils/MediaFilesAws/UploadMediaFilesAws.js";
-import { compressVideo } from "../../../../utils/VideoCompressor.js"; // Adjust path as needed
 import { imagesToPdf } from "../../../../utils/ImageToPdf.js";
+import { producer } from "../../../../config/kafka.config.js";
 
-import fs from "fs";
 import path from "path";
-import { v4 as uuidv4 } from 'uuid';
-import {convertAndCompressToMp4} from "../../../../utils/VideoConverterAndCompress.js"
 
 const AddEachGem = async (req, res) => {
   try {
@@ -31,76 +28,33 @@ const AddEachGem = async (req, res) => {
       console.log("Size after PDF conversion:", (certificateFile.buffer.length / 1024).toFixed(2), "KB");
     }
 
-   // 1. CONVERSION & COMPRESSION STEP
-    for (const file of req.files) {
-      if (file.mimetype.startsWith("video/")) {
-        console.log(`--- Processing Video: ${file.originalname} ---`);
-        const sizeBeforeMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-        console.log(`Size before processing: ${sizeBeforeMB} MB`);
+    // 1. Find the video file and format media files
+    let videoFile = req.files.find(file => file.mimetype.startsWith("video/"));
+    let tempVideoName = null;
 
-        if (file.mimetype !== "video/mp4") {
-          // CASE A: Video needs conversion AND compression
-          console.log(`Converting and compressing ${file.originalname} to MP4...`);
+    const formattedFiles = req.files.map(file => {
+      const isVideo = file.mimetype.startsWith("video/");
+      let fileName;
 
-          const uploadDir = './uploads';
-          // FIX 1: Ensure the directory exists before writing to it
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-
-          const tempInputPath = path.join('./uploads', `temp_${uuidv4()}${path.extname(file.originalname)}`);
-          fs.writeFileSync(tempInputPath, file.buffer);
-          const outputDir = './converted';
-
-          try {
-            // Run combined optimization utility
-            const result = await convertAndCompressToMp4(tempInputPath, outputDir);
-            
-            // CRITICAL FIXES: Update the file references in req.files array
-
-            console.log("return result:", result);
-            file.buffer = result.buffer;
-            file.size = result.buffer.length;
-            file.mimetype = "video/mp4"; // Correcting type for AWS S3 mapping
-            file.originalname = result.fileName;
-
-            const sizeAfterMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-            console.log(`Conversion/Compression complete. New Size: ${sizeAfterMB} MB`);
-
-          } catch (error) {
-            console.error(`Failed to process non-MP4 video ${file.originalname}:`, error);
-            return res.status(500).json({ status: false, message: `Processing error on ${file.originalname}` });
-          } finally {
-            if (fs.existsSync(tempInputPath)) fs.unlinkSync(tempInputPath);
-          }
-
-        } else {
-          // CASE B: Video is already an MP4. Just run standard compression.
-          console.log(`Video is already MP4. Running standard compression on ${file.originalname}...`);
-          try {
-            const compressedBuffer = await compressVideo(file.buffer);
-            
-            file.buffer = compressedBuffer;
-            file.size = compressedBuffer.length;
-            
-            const sizeAfterMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-            console.log(`Compression successful. New Size: ${sizeAfterMB} MB`);
-          } catch (compressionError) {
-            console.error(`Failed to compress native MP4 ${file.originalname}`, compressionError);
-            return res.status(500).json({ status: false, message: "Compression failure." });
-          }
-        }
+      if (isVideo) {
+        // Generate temporary name for S3 upload
+        const randomBase = RandomName();
+        const ext = path.extname(file.originalname) || ".mp4";
+        fileName = `temp_${randomBase}${ext}`;
+        tempVideoName = fileName;
+      } else {
+        fileName = RandomName();
       }
-    }
 
-    // 2. Formatting files (now containing compressed buffers where applicable)
-    const formattedFiles = req.files.map(file => ({
-      fileName: RandomName(),
-      fileType: file.mimetype,
-      buffer: file.buffer
-    }));
+      return {
+        fileName,
+        fileType: file.mimetype,
+        buffer: file.buffer,
+        isVideo
+      };
+    });
 
-    // 3. Gem details processing
+    // 2. Create EachGem in DB
     const gemDetails = {
       lot_number: req.body.lot_number,
       description: req.body.description,
@@ -112,32 +66,78 @@ const AddEachGem = async (req, res) => {
       shape_id: Number(req.body.shape_id)
     };
 
-    const result = await AddNewEachGem(gemDetails);
-    const Each_Gem_Id = result.data.each_gem_id;
+    console.log("Gem details to be added:", gemDetails);
 
-    // 4. Upload to S3
-    for (const file of formattedFiles) {
-      console.log("Uploading to S3:", file.fileName);
-      await UploadMediaFilesAws(
+    // 3. Start uploading images, pdf and temporary original video directly to S3 in parallel
+    const s3UploadPromises = formattedFiles.map(file => {
+      console.log("Starting upload to S3:", file.fileName);
+      return UploadMediaFilesAws(
         file.fileType,
         file.fileName,
         file.buffer
       );
-    }
+    });
 
-    // 5. Prepare data for Microservice 2
+    // 2. Create EachGem in DB concurrently with S3 uploads
+    const dbGemPromise = AddNewEachGem(gemDetails);
+
+    // Wait for all uploads and the DB creation to finish
+    const [_, result] = await Promise.all([
+      Promise.all(s3UploadPromises),
+      dbGemPromise
+    ]);
+    const Each_Gem_Id = result.data.each_gem_id;
+
+    // 4. Prepare data for database media registration (using 'Pending' for video)
     const filenames = formattedFiles.map(file => {
       const type = file.fileType.split("/")[0];
       return {
-        media_file: file.fileName,
+        media_file: file.isVideo ? "Pending" : file.fileName,
         media_type: type === "application" ? file.fileType.split("/")[1] : type
       };
     });
 
     const MediaUploadData = await AddEachGemMedia(Each_Gem_Id, filenames);
 
+    // 5. Retrieve the media ID of the 'Pending' video from response
+    let pendingMediaId = null;
+    if (videoFile && MediaUploadData && MediaUploadData.success && Array.isArray(MediaUploadData.data)) {
+      const videoIndex = filenames.findIndex(item => item.media_file === "Pending");
+      if (videoIndex !== -1 && MediaUploadData.data[videoIndex]) {
+        pendingMediaId = MediaUploadData.data[videoIndex].media_id;
+      }
+    }
+
+    // 6. Send video processing task to Kafka if enabled
+    if (videoFile && pendingMediaId && tempVideoName) {
+      console.log("Sending video processing job to Kafka...");
+      if (process.env.KAFKA_ENABLED === "true") {
+        try {
+          await producer.send({
+            topic: "video-processing",
+            messages: [
+              {
+                value: JSON.stringify({
+                  media_id: pendingMediaId,
+                  tempVideoName: tempVideoName,
+                  fileType: videoFile.mimetype,
+                  each_gem_id: Each_Gem_Id
+                })
+              }
+            ]
+          });
+          console.log("✅ Kafka message published successfully");
+        } catch (kafkaError) {
+          console.error("❌ Failed to publish video processing message to Kafka:", kafkaError);
+        }
+      } else {
+        console.log("ℹ️ Kafka is disabled. Video processing skipped.");
+      }
+    }
+
+    // 7. Send 200 response immediately to the frontend
     return res.status(200).json({
-      message: "Gem created successfully",
+      message: "Gem created successfully. Video is processing in background.",
       each_gem_id: Each_Gem_Id,
       MediaUploadData,
       serviceRes: result

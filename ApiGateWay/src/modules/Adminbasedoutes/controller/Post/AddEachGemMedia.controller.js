@@ -1,25 +1,25 @@
 import RandomName from "../../../../utils/RandomName.js";
 import UploadMediaFilesAws  from "../../../../utils/MediaFilesAws/UploadMediaFilesAws.js";
 import AddEachGemMedia from "../../services/Post/AddEachGem/AddEachGemMedia.service.js";
-import { compressVideo } from "../../../../utils/VideoCompressor.js"; // Adjust path as needed
 import { imagesToPdf } from "../../../../utils/ImageToPdf.js";
+import { producer } from "../../../../config/kafka.config.js";
+import DeleteEachGemMediaByType_Service from "../../services/Delete/DeleteEachGemMediaByType.service.js";
+import DeleteMediaFilesAws from "../../../../utils/MediaFilesAws/DeleteMediaFilesAws.js";
 
 import fs from "fs";
 import path from "path";
-import { v4 as uuidv4 } from 'uuid';
-import {convertAndCompressToMp4} from "../../../../utils/VideoConverterAndCompress.js"
 
-const AddEachGemMediaController = async (req,res) => {
-    const {each_gem_id} = req.body;
+const AddEachGemMediaController = async (req, res) => {
+    const { each_gem_id } = req.body;
 
-    if(!each_gem_id){
-            return res.status(400).json({ error: "Each Gem ID is required" });
+    if (!each_gem_id) {
+        return res.status(400).json({ error: "Each Gem ID is required" });
     }
 
     const receivedFiles = req.files;
 
-    if (!Array.isArray(receivedFiles) || receivedFiles.length === 0){
-            return res.status(400).json({ error: "No media files received for Each Gem" });
+    if (!Array.isArray(receivedFiles) || receivedFiles.length === 0) {
+        return res.status(400).json({ error: "No media files received for Each Gem" });
     }
 
     let certificateFile = req.files.find(file => 
@@ -28,119 +28,132 @@ const AddEachGemMediaController = async (req,res) => {
     console.log("Certificate file found:", !!certificateFile);
 
     if (certificateFile && certificateFile.mimetype !== "application/pdf") {
-
-      console.log("Size before PDF conversion:", (certificateFile.buffer.length / 1024).toFixed(2), "KB");
+        console.log("Size before PDF conversion:", (certificateFile.buffer.length / 1024).toFixed(2), "KB");
         certificateFile.buffer = await imagesToPdf(certificateFile.buffer);
         certificateFile.mimetype = "application/pdf";
         certificateFile.originalname = "certificate.pdf";
-      console.log("Size after PDF conversion:", (certificateFile.buffer.length / 1024).toFixed(2), "KB");
+        console.log("Size after PDF conversion:", (certificateFile.buffer.length / 1024).toFixed(2), "KB");
     }
-        // 1. COMPRESSION STEP: Process videos before formatting
-    // We update the buffers in the original req.files array if they are MP4s
-    for (const file of req.files) {
-      if (file.mimetype.startsWith("video/")) {
-        console.log(`--- Processing Video: ${file.originalname} ---`);
-        const sizeBeforeMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-        console.log(`Size before processing: ${sizeBeforeMB} MB`);
 
-        if (file.mimetype !== "video/mp4") {
-          // CASE A: Video needs conversion AND compression
-          console.log(`Converting and compressing ${file.originalname} to MP4...`);
+    // 1. Find the video file and format media files
+    let videoFile = req.files.find(file => file.mimetype.startsWith("video/"));
+    let tempVideoName = null;
 
-          const uploadDir = './uploads';
-          // FIX 1: Ensure the directory exists before writing to it
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
+    const formattedFiles = req.files.map(file => {
+        const isVideo = file.mimetype.startsWith("video/");
+        let fileName;
 
-          const tempInputPath = path.join('./uploads', `temp_${uuidv4()}${path.extname(file.originalname)}`);
-          fs.writeFileSync(tempInputPath, file.buffer);
-          const outputDir = './converted';
-
-          try {
-            // Run combined optimization utility
-            const result = await convertAndCompressToMp4(tempInputPath, outputDir);
-            
-            // CRITICAL FIXES: Update the file references in req.files array
-
-            console.log("return result:", result);
-            file.buffer = result.buffer;
-            file.size = result.buffer.length;
-            file.mimetype = "video/mp4"; // Correcting type for AWS S3 mapping
-            file.originalname = result.fileName;
-
-            const sizeAfterMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-            console.log(`Conversion/Compression complete. New Size: ${sizeAfterMB} MB`);
-
-          } catch (error) {
-            console.error(`Failed to process non-MP4 video ${file.originalname}:`, error);
-            return res.status(500).json({ status: false, message: `Processing error on ${file.originalname}` });
-          } finally {
-            if (fs.existsSync(tempInputPath)) fs.unlinkSync(tempInputPath);
-          }
-
+        if (isVideo) {
+            // Generate temporary name for S3 upload
+            const randomBase = RandomName();
+            const ext = path.extname(file.originalname) || ".mp4";
+            fileName = `temp_${randomBase}${ext}`;
+            tempVideoName = fileName;
         } else {
-          // CASE B: Video is already an MP4. Just run standard compression.
-          console.log(`Video is already MP4. Running standard compression on ${file.originalname}...`);
-          try {
-            const compressedBuffer = await compressVideo(file.buffer);
-            
-            file.buffer = compressedBuffer;
-            file.size = compressedBuffer.length;
-            
-            const sizeAfterMB = (file.buffer.length / (1024 * 1024)).toFixed(2);
-            console.log(`Compression successful. New Size: ${sizeAfterMB} MB`);
-          } catch (compressionError) {
-            console.error(`Failed to compress native MP4 ${file.originalname}`, compressionError);
-            return res.status(500).json({ status: false, message: "Compression failure." });
-          }
+            fileName = RandomName();
         }
-      }
-    }
-    
-    const formattedFiles = receivedFiles.map(file => ({
-        fileName: RandomName(),
-        fileType: file.mimetype,
-        buffer: file.buffer
-    }));
 
-    console.log("Formatted files for Each Gem media upload:", formattedFiles);
+        return {
+            fileName,
+            fileType: file.mimetype,
+            buffer: file.buffer,
+            isVideo
+        };
+    });
 
-    try{
-        // Parallel upload
-        const uploadResults = await Promise.all(
-            formattedFiles.map(file =>
-                UploadMediaFilesAws(file.fileType, file.fileName, file.buffer)
-            )
-        );
+    try {
+        // If a new video is being uploaded, delete the previous video records and their S3 files
+        if (videoFile) {
+            console.log(`⚠️ New video file detected. Cleaning up any existing video records for each_gem_id: ${each_gem_id}...`);
+            try {
+                const deleteRes = await DeleteEachGemMediaByType_Service(each_gem_id, "video");
+                if (deleteRes && deleteRes.success && Array.isArray(deleteRes.existing)) {
+                    for (const oldVideo of deleteRes.existing) {
+                        if (oldVideo.media_file !== "Failed" && oldVideo.media_file !== "Pending") {
+                            console.log(`🗑️ Deleting old video file from S3: ${oldVideo.media_file}`);
+                            try {
+                                await DeleteMediaFilesAws(oldVideo.media_file);
+                            } catch (s3Err) {
+                                console.error(`Failed to delete S3 file ${oldVideo.media_file}:`, s3Err.message);
+                            }
+                        }
+                    }
+                }
+            } catch (cleanupErr) {
+                console.error("Failed to clean up existing video records:", cleanupErr.message);
+            }
+        }
 
-        console.log("Upload results for Each Gem media files:", uploadResults);
+        // 2. Start uploading images, pdf, and temporary original video directly to S3 in parallel
+        const s3UploadPromises = formattedFiles.map(file => {
+            console.log("Starting upload to S3:", file.fileName);
+            return UploadMediaFilesAws(
+                file.fileType,
+                file.fileName,
+                file.buffer
+            );
+        });
 
-        const fileNames = formattedFiles.map(file => {
-            const [type, subtype] = file.fileType.split("/");
+        // Wait for all S3 uploads to finish
+        await Promise.all(s3UploadPromises);
+
+        // 3. Prepare data for database media registration (using 'Pending' for video)
+        const filenames = formattedFiles.map(file => {
+            const type = file.fileType.split("/")[0];
             return {
-                media_file: file.fileName,
-                media_type: type === "application" ? subtype : type
+                media_file: file.isVideo ? "Pending" : file.fileName,
+                media_type: type === "application" ? file.fileType.split("/")[1] : type
             };
         });
-        console.log("File names to be associated with Each Gem ID", each_gem_id, ":", fileNames);
-         // Here you would typically call a service function to associate the uploaded media files with the Each Gem details in your database, using the each_gem_id and fileNames array.
-         const associationResult = await AddEachGemMedia(each_gem_id, fileNames);
-         
-        console.log("Result of associating media files with Each Gem ID", each_gem_id, ":", associationResult);
 
-         return res.status(200).json({ 
-            message: "Media files uploaded and associated with Each Gem successfully" ,
-            data: associationResult
-         });
-       
+        const MediaUploadData = await AddEachGemMedia(each_gem_id, filenames);
 
+        // 4. Retrieve the media ID of the 'Pending' video from response
+        let pendingMediaId = null;
+        if (videoFile && MediaUploadData && MediaUploadData.success && Array.isArray(MediaUploadData.data)) {
+            const videoIndex = filenames.findIndex(item => item.media_file === "Pending");
+            if (videoIndex !== -1 && MediaUploadData.data[videoIndex]) {
+                pendingMediaId = MediaUploadData.data[videoIndex].media_id;
+            }
+        }
+
+        // 5. Send video processing task to Kafka if enabled
+        if (videoFile && pendingMediaId && tempVideoName) {
+            console.log("Sending video processing job to Kafka...");
+            if (process.env.KAFKA_ENABLED === "true") {
+                try {
+                    await producer.send({
+                        topic: "video-processing",
+                        messages: [
+                            {
+                                value: JSON.stringify({
+                                    media_id: pendingMediaId,
+                                    tempVideoName: tempVideoName,
+                                    fileType: videoFile.mimetype,
+                                    each_gem_id: Number(each_gem_id)
+                                })
+                            }
+                        ]
+                    });
+                    console.log("✅ Kafka message published successfully");
+                } catch (kafkaError) {
+                    console.error("❌ Failed to publish video processing message to Kafka:", kafkaError);
+                }
+            } else {
+                console.log("ℹ️ Kafka is disabled. Video processing skipped.");
+            }
+        }
+
+        // 6. Return 200 response immediately to the frontend
+        return res.status(200).json({
+            message: "Media files uploaded successfully. Video is processing in background.",
+            MediaUploadData
+        });
+
+    } catch (error) {
+        console.log("Error in AddEachGemMedia controller:", error);
+        return res.status(500).json({ error: "Failed to add media for Each Gem" });
     }
-    catch(error){
-        console.log("Error in AddEachGemMedia controller",error);
-        return res.status(500).json({ error: "Failed to add media for Each Gem" }); 
-    }
-}
-
+};
 
 export default AddEachGemMediaController;

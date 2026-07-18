@@ -52,6 +52,9 @@ uploads/
 # Temporary Files
 # ------------------------
 tmp/
+temp/
+converted/
+uploads/
 .cache/
 
 # ------------------------

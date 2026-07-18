@@ -18,22 +18,27 @@ const AddGem = async(req,res)=>{
 
         console.log(formattedFiles);
 
-        const data = await AddGemDetails_Service.AddGemDetails_Service(gem_name,gem_division);
-        console.log(data);
-       
-
-        const Gem_Id = data.data.gem_id;
-        console.log("Gem Id received from microservice 1:", Gem_Id);
-
-        for (const file of formattedFiles) {
-            console.log("Uploading file:", file.fileName, "of type:", file.fileType);
-            const response = await UploadMediaFilesAws(
+        // Start S3 uploads in parallel
+        const s3UploadPromises = formattedFiles.map(file => {
+            console.log("Starting upload of file:", file.fileName, "of type:", file.fileType);
+            return UploadMediaFilesAws(
               file.fileType,
               file.fileName,
               file.buffer
             );
-            console.log("Response from S3 upload:", response);
-          }
+        });
+
+        // Add Gem details in DB concurrently
+        const dbGemPromise = AddGemDetails_Service.AddGemDetails_Service(gem_name,gem_division);
+
+        const [_, data] = await Promise.all([
+            Promise.all(s3UploadPromises),
+            dbGemPromise
+        ]);
+        console.log(data);
+
+        const Gem_Id = data.data.gem_id;
+        console.log("Gem Id received from microservice 1:", Gem_Id);
           
         const media_files = formattedFiles.map(file => file.fileName);
 

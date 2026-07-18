@@ -17,17 +17,24 @@ const AddEachGemThumNail = async(req,res)=>{
         }));
         console.log("Formated files:", formatedFiles);
 
-        for(const file of formatedFiles){
-            const uploadResult = await UploadMediaFilesAws(file.filetype, file.filename, file.buffer);
-            console.log("Upload result for file:", file.filename, uploadResult);
-            // Here you can save the uploadResult URL to your database associated with the each_gem_id
-        }
+        // Start S3 uploads in parallel
+        const s3UploadPromises = formatedFiles.map(file => {
+            console.log("Starting upload for file:", file.filename);
+            return UploadMediaFilesAws(file.filetype, file.filename, file.buffer);
+        });
 
-        const media_url = formatedFiles.map(file => file.filename).join(" "); // Assuming the filename is the URL or you can modify this to get the actual URL from the upload result
+        const media_url = formatedFiles.map(file => file.filename).join(" ");
 
         console.log("Media URLs to be saved for each_gem_id", each_gem_id, media_url);
 
-        const response = await AddEachGemThumNailService(each_gem_id, media_url);
+        // Start DB insert concurrently
+        const dbPromise = AddEachGemThumNailService(each_gem_id, media_url);
+
+        // Wait for uploads and DB insert to complete
+        const [_, response] = await Promise.all([
+            Promise.all(s3UploadPromises),
+            dbPromise
+        ]);
         
 
         return res.status(200).json({ 
