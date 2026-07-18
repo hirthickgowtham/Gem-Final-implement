@@ -6,7 +6,7 @@ const storage = multer.memoryStorage();
 
 // ✅ Allowed MIME types per category
 const allowedMimeTypes = {
-  images: ["image/jpeg", "image/png", "image/webp", "image/x-icon", "image/vnd.microsoft.icon"],
+  images: ["image/jpeg", "image/png", "image/webp", "image/x-icon", "image/vnd.microsoft.icon","image/avif"],
   videos: ["video/mp4"],
   pdfs: ["application/pdf"]
 };
@@ -17,6 +17,7 @@ const allowedExtensions = [
   ".jpeg",
   ".png",
   ".webp",
+  ".avif",
   ".mp4",
   ".pdf",
   ".ico"

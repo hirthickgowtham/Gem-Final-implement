@@ -26,6 +26,7 @@ export function convertAndCompressToMp4(inputPath, outputDir) {
         '-c:a aac',          // Convert the extracted audio track to AAC
         '-crf 28',           // Compress the video track on the fly
         '-preset faster',    // Maintain quick backend thread processing
+        '-vf scale=-2:\'min(1080,ih)\',fps=30', // Scale to 1080p and cap framerate to 30fps
         '-ignore_unknown',   // Crucial: Tell the global decoder engine to overlook stream #0:2
         '-map_metadata -1',  // Drop the faulty Apple data envelope
         '-threads 4'

@@ -25,6 +25,7 @@ export const compressVideo = (fileBuffer) => {
       "-vcodec", "libx264",
       "-crf", "28",
       "-preset", "veryfast",
+      "-vf", "scale=-2:'min(1080,ih)',fps=30",
       "-map", "0:v:0",
       "-map", "0:a:0?",
       "-ignore_unknown",
