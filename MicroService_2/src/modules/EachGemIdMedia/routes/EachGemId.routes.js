@@ -48,7 +48,7 @@ router.delete('/delete_each_gem_media_by_type', async (req, res) => {
         if (!each_gem_id || !media_type) {
             return res.status(400).json({ success: false, message: "each_gem_id and media_type are required" });
         }
-        const pool = require('../../../../config/db.config');
+        const pool = require('../../../config/db.config');
         
         // Find existing records first to allow file cleanup in API Gateway
         const findQuery = `SELECT * FROM media_table WHERE each_gem_id = $1 AND media_type = $2`;
