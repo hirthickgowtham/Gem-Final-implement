@@ -7,6 +7,7 @@ const ShapeColorFilter = async (gem_id, filter1, filter2, value1, value2, page, 
         eg.each_gem_id,
         eg.lot_number,
         eg.crt,
+        eg.price,
         t.image AS thumbnail
     FROM each_gem_detail eg
     LEFT JOIN thumbnail t

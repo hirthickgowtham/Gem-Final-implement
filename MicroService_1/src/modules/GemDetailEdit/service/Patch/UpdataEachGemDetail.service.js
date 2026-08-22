@@ -10,7 +10,8 @@ const UpdataEachGemDetailService = async (each_gem_id, payload) => {
         'description',
         'category',
         'color_id',
-        'shape_id'
+        'shape_id',
+        'price'
     ];
 
     const keys = Object.keys(payload).filter(k =>

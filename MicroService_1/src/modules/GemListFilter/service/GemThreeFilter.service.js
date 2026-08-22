@@ -14,6 +14,7 @@ const ThreeFilter = async (gem_id, filter1, filter2, filter3, page, limit) => {
         eg.each_gem_id,
         eg.lot_number,
         eg.crt,
+        eg.price,
         t.image AS thumbnail
     FROM each_gem_detail eg
     LEFT JOIN thumbnail t

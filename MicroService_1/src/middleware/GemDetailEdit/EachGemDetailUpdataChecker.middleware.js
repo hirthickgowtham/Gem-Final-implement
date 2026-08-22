@@ -17,7 +17,8 @@ const validationChecker = async (req, res, next) => {
             'description',
             'category',
             'color_id',
-            'shape_id'
+            'shape_id',
+            'price'
         ];
         
         const keys = Object.keys(gemDetails).filter(k =>
@@ -25,7 +26,7 @@ const validationChecker = async (req, res, next) => {
         );
 
         if (keys.length === 0) {
-            return sendResponse(res, 400, false, "At least one field must be provided to update: lot_number, crt, number_of_gems, gem_id, category, color_id, shape_id, description");
+            return sendResponse(res, 400, false, "At least one field must be provided to update: lot_number, crt, number_of_gems, gem_id, category, color_id, shape_id, description, price");
         }
 
         if(!gemDetails.each_gem_id){

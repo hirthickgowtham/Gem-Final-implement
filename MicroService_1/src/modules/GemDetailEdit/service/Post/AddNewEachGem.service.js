@@ -12,9 +12,10 @@ const AddNewGemService = async (gemDetails) => {
         category,
         color_id,
         shape_id,
-        description
+        description,
+        price
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING each_gem_id;
     `;
 
@@ -26,7 +27,8 @@ const AddNewGemService = async (gemDetails) => {
         Number(gemDetails.category),
         Number(gemDetails.color_id),
         Number(gemDetails.shape_id),
-        gemDetails.description
+        gemDetails.description,
+        Number(gemDetails.price)
     ];
 
     const { rows } = await pool.query(query, values);
