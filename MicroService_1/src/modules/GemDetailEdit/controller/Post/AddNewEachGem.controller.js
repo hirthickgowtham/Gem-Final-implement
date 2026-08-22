@@ -7,11 +7,9 @@ const AddNewEachGem = async (req, res) => {
     try {
         const gemDetails = req.body;
 
-        console.log(gemDetails)
-        
         const data = await AddNewGemService(gemDetails);
 
-        return sendResponse(res, 201, true, "Gem added successfully");
+        return sendResponse(res, 201, true, "Gem added successfully", data);
 
     } catch(error){
         console.error("Error in AddNewGem controller:", error);
