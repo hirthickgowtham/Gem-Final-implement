@@ -9,8 +9,16 @@ const allowedTypes = [
   "image/webp",
   "image/vnd.microsoft.icon",
   "image/x-icon",
+  "image/avif",
   "video/mp4",
-  "application/pdf"
+  "application/pdf",
+  "video/quicktime",
+  "video/x-matroska",
+  "video/x-msvideo",
+  "video/webm",
+  "video/mpeg",
+  "video/ogg",
+  "video/3gpp"
 ];
 
 const allowedExtensions = [
@@ -18,9 +26,17 @@ const allowedExtensions = [
   ".jpeg",
   ".png",
   ".webp",
+  ".avif",
   ".mp4",
   ".pdf",
-  ".ico"
+  ".ico",
+  ".mov",
+  ".mkv",
+  ".avi",
+  ".webm",
+  ".mpeg",
+  ".ogg",
+  ".3gp"
 ];
 
 const fileFilter = (req, file, cb) => {
@@ -39,9 +55,6 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage,
-  limits: {
-    fileSize: 50 * 1024 * 1024
-  },
   fileFilter
 });
 

@@ -5,13 +5,14 @@ const validationChecker = (req, res, next) => {
     try {
 
         const gemDetails = req.body;
+        const gemDetails = req.body;
 
 
         if (!variableChecker(gemDetails)) {
             return sendResponse(res, 400, false, "All fields are required: lot_number, crt, number_of_gems, gem_id, category, color_id, shape_id, description, price." );
         }
 
-    }catch (erro) {
+    }catch (error) {
         console.error("Error in validationChecker middleware:", error);
         return sendResponse(res, 500, false, "Internal Server Error");
     }

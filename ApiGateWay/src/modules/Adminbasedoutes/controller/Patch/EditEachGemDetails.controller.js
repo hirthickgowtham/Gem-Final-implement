@@ -110,10 +110,20 @@ const Edit_Each_Gem_Details = async(req,res)=>{
 
     }
     catch(error){
-        console.log("Error in Edit Each Gem Details Controller", error);
-        return res.status(500).json({
-            error
-        })
+        console.log(error.response?.data);
+
+    return res.status(
+        error.response?.status || 500
+    ).json({
+
+      success:false,
+
+      message:
+         error.response?.data?.message ||
+         error.message ||
+
+         "Internal server error"
+    });
     }
 }
 

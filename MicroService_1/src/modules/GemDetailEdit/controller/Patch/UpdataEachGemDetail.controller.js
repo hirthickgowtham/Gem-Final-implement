@@ -15,7 +15,7 @@ const UpdataEachGemDetailController = async (req, res) => {
         
     } catch (error) {
         console.error("Error in UpdataEachGemDetailController:", error);
-        sendResponse(res, 500, false, "Failed to update each gem detail");
+        sendResponse(res, 500, false, error.detail || "Internal Server Error");
     }
 }
 

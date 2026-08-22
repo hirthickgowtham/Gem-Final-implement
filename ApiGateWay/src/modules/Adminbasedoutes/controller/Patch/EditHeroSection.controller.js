@@ -1,48 +1,90 @@
 import UploadMediaFilesAws from "../../../../utils/MediaFilesAws/UploadMediaFilesAws.js";
+import DeleteMediaFilesAws from "../../../../utils/MediaFilesAws/DeleteMediaFilesAws.js";
 import EditHeroSectionService from "../../services/Patch/EditHeroSection.service.js";
+import RandomName from "../../../../utils/RandomName.js";
 
 
 
 const EditHeroSection = async(req,res)=>{
     try {
-        
-        const {heroUrl} = req.body;
-        const image = req.file;
-        if(!req.body.HeroId){
-            return res.status(400).json({message:"id is required"})
-        }
 
-        // console.log(id,title,description);
-        console.log("Hero section edit route hit",heroUrl);
-        
-        if(image){
-            if(image.mimetype.split("/")[0] !== "image"){
-                return res.status(400).json({message:"Only image files are allowed for the hero section"})
-            }
-            if(!heroUrl){
-                return res.status(400).json({message:"heroUrl is required when an image file is uploaded"})
-            }
-            const formatedFile = {
-                filename: heroUrl,
-                filetype: image.mimetype.split("/")[1],
-                buffer: image.buffer
-            }
-            console.log(formatedFile);
-            const response = await UploadMediaFilesAws(formatedFile.filetype,formatedFile.filename,formatedFile.buffer);
-            console.log(response);
-        }
+    const { image_url, HeroId } = req.body;
+    const image = req.file;
 
-        const data = await EditHeroSectionService(req.body);
-        return res.status(200).json({
-            message:"Hero section edited successfully",
-            data
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message:"Internal server error"
-        })
+    if (!HeroId) {
+      return res.status(400).json({
+        message: "HeroId is required"
+      });
     }
-}
+
+    const hasUpdates =
+        req.body.title ||
+        req.body.description ||
+        req.body.image_url ||
+        image;
+
+    if (!hasUpdates) {
+    return res.status(400).json({
+        message: "At least one field is required to update"
+    });
+    }
+
+    let data;
+
+    if (image) {
+
+      if (!image?.mimetype?.startsWith("image/")) {
+        return res.status(400).json({
+          message: "Only image files are allowed"
+        });
+      }
+
+      if (!image_url || !image_url.trim()) {
+        return res.status(400).json({
+          message: "image_url is required"
+        });
+      }
+
+      const filename = RandomName();
+
+      const uploadResponse = await UploadMediaFilesAws(
+        "image",
+        filename,
+        image.buffer
+      );
+
+      console.log(uploadResponse);
+
+      data = await EditHeroSectionService({
+        ...req.body,
+        image_url: filename
+      });
+
+      const Delres = await DeleteMediaFilesAws(image_url);
+      console.log(Delres);
+
+    } 
+    else {
+
+      data = await EditHeroSectionService(req.body);
+      console.log(data);
+
+    }
+
+    return res.status(200).json({
+      message: "Hero section edited successfully",
+      data
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
+
 
 export default {EditHeroSection}
