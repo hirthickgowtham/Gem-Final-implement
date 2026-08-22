@@ -52,11 +52,13 @@ CREATE TABLE each_gem_detail (
     category INTEGER NOT NULL
         CHECK (category IN (1, 2)),
 
-    color_id INTEGER ,
+    color_id INTEGER,
 
     date DATE DEFAULT CURRENT_DATE,
 
     shape_id INTEGER,
+
+    price NUMERIC(10,2) NOT NULL,
 
     CONSTRAINT fk_gem
         FOREIGN KEY (gem_id)
@@ -159,6 +161,7 @@ SELECT
     eg.number_of_gems,
     eg.category,
     eg.gem_id,
+    eg.price,
 
     c.color_name,
     s.shape_name,
