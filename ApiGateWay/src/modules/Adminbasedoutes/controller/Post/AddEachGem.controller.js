@@ -63,7 +63,8 @@ const AddEachGem = async (req, res) => {
       gem_id: Number(req.body.gem_id),
       category: Number(req.body.category),
       color_id: Number(req.body.color_id),
-      shape_id: Number(req.body.shape_id)
+      shape_id: Number(req.body.shape_id),
+      price: Number(req.body.price)
     };
 
     console.log("Gem details to be added:", gemDetails);

@@ -23,7 +23,8 @@ const Edit_Each_Gem_Details = async(req,res)=>{
         'description',
         'category',
         'color_id',
-        'shape_id'
+        'shape_id',
+        'price'
     ];
     const hasGemUpdates = Object.keys(req.body).some(key =>
         allowedFields.includes(key)
