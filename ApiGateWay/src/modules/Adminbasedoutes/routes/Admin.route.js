@@ -45,7 +45,7 @@ route.post("/add-color",AddColorController.AddColor);
 route.post("/add-gem",uploadGemFiles,AddGemController.AddGem);
 route.post("/add-each-gem-thumbnail",uploadGemFiles,AddEachGemThumNailController.AddEachGemThumNail);
 route.post("/add-hero-section",upload.single("image"),AddHeroSectionContoller.AddHeroSection);
-route.post("/add-each-gem-media",uploadGemFiles,AddEachGemMediaController);
+route.post("/add-each-gem-media", AddEachGemMediaController);
 //Still Add Gem file upload is pending 
 
 

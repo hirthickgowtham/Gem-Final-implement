@@ -114,6 +114,23 @@ CREATE TABLE thumbnail (
 );
 
 
+-- creating media_status table to track video/media processing status
+CREATE TABLE media_status (
+    media_id BIGINT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'ready', 'failed')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_media_status
+        PRIMARY KEY (media_id),
+
+    CONSTRAINT fk_media_status_media
+        FOREIGN KEY (media_id)
+        REFERENCES media_table(media_id)
+        ON DELETE CASCADE
+);
+
+
 -- creating hero_section table to handle hero_section images
 
 CREATE TABLE hero_section (
@@ -146,6 +163,10 @@ ON media_table(each_gem_id);
 -- Media table index for media type filtering
 CREATE INDEX idx_media_each_gem_type
 ON media_table (each_gem_id, media_type);
+
+-- Media status table index for status check
+CREATE INDEX idx_media_status_media_id
+ON media_status (media_id);
 
 
 
@@ -199,9 +220,11 @@ LEFT JOIN LATERAL (
 LEFT JOIN LATERAL (
     SELECT jsonb_build_object(
         'media_id', m.media_id,
-        'file', m.media_file
+        'file', m.media_file,
+        'status', COALESCE(ms.status, 'ready')
     ) AS video
     FROM media_table m
+    LEFT JOIN media_status ms ON ms.media_id = m.media_id
     WHERE m.each_gem_id = eg.each_gem_id
       AND m.media_type = 'video'
     LIMIT 1
@@ -218,6 +241,7 @@ LEFT JOIN LATERAL (
       AND m.media_type = 'pdf'
     LIMIT 1
 ) pdf ON TRUE;
+
 
 
 

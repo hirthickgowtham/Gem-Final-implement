@@ -1,0 +1,112 @@
+### Variables
+@baseUrl = http://localhost:5002/api
+@mediaId = 105
+
+###############################################################################
+# 1. POST: Create / Initialize Media Status (Default status: 'pending')
+###############################################################################
+
+### 1.1 Positive: Successfully create media status (defaults to "pending")
+POST {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": {{mediaId}}
+}
+
+### 1.2 Positive: Successfully create media status with explicit "pending"
+POST {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": {{mediaId}},
+  "status": "pending"
+}
+
+### 1.3 Negative: Missing media_id (Should return 400)
+POST {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "status": "pending"
+}
+
+### 1.4 Negative: Invalid status enum value (Should return 400)
+POST {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": {{mediaId}},
+  "status": "invalid_status_xyz"
+}
+
+
+###############################################################################
+# 2. GET: Retrieve Media Status by media_id
+###############################################################################
+
+### 2.1 Positive: Retrieve existing media status (Returns status: 'pending' or 'ready')
+GET {{baseUrl}}/media_status/{{mediaId}}
+
+### 2.2 Negative: Non-existent media_id (Should return 404)
+GET {{baseUrl}}/media_status/9999999
+
+
+###############################################################################
+# 3. PATCH: Update Media Status (Set status to 'ready' or 'failed')
+###############################################################################
+
+### 3.1 Positive: Successfully update status to 'ready' (Transcoding complete)
+PATCH {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": {{mediaId}},
+  "status": "ready"
+}
+
+### 3.2 Positive: Successfully update status to 'failed' (Transcoding error)
+PATCH {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": {{mediaId}},
+  "status": "failed"
+}
+
+### 3.3 Negative: Missing media_id (Should return 400)
+PATCH {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "status": "ready"
+}
+
+### 3.4 Negative: Invalid status string enum (Should return 400)
+PATCH {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": {{mediaId}},
+  "status": "done"
+}
+
+### 3.5 Negative: Update non-existent media_id (Should return 404)
+PATCH {{baseUrl}}/media_status
+Content-Type: application/json
+
+{
+  "media_id": 9999999,
+  "status": "ready"
+}
+
+
+###############################################################################
+# 4. DELETE: Delete Media Status Record
+###############################################################################
+
+### 4.1 Positive: Delete existing media status
+DELETE {{baseUrl}}/media_status/{{mediaId}}
+
+### 4.2 Negative: Delete non-existent media status (Should return 404)
+DELETE {{baseUrl}}/media_status/9999999
