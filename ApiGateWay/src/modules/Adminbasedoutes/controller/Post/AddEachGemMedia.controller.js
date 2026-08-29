@@ -182,13 +182,17 @@ const AddEachGemMediaController = (req, res) => {
                 return res.status(400).json({ error: "Each Gem ID is required" });
             }
 
-            if (!hasFiles || uploadedMediaMeta.length === 0) {
+            if (!hasFiles || fileUploadPromises.length === 0) {
                 return res.status(400).json({ error: "No media files received for Each Gem" });
             }
 
-            // Wait for all S3 streaming uploads to finish
+            // Wait for all S3 streaming uploads and async conversions (PDF/etc.) to finish
             await Promise.all(fileUploadPromises);
             console.log("✅ All media files streamed to S3 successfully");
+
+            if (uploadedMediaMeta.length === 0) {
+                return res.status(400).json({ error: "No media files processed for Each Gem" });
+            }
 
             // If a new video was uploaded, clean up old video records and S3 files
             if (videoFileMeta) {
