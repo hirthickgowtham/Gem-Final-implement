@@ -21,5 +21,8 @@ const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-
-server.timeout = 600000;
+// Allow large media files (videos/images) to stream without timing out
+server.timeout = 0;              // Disable socket inactivity timeout
+server.requestTimeout = 0;       // Disable request body timeout (prevents Node.js 5-min disconnect on large uploads)
+server.headersTimeout = 65000;   // 65s for initial headers
+server.keepAliveTimeout = 60000; // 60s keep-alive
