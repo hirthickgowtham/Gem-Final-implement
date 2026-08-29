@@ -39,7 +39,7 @@ const route = express.Router();
 
 
 
-route.post("/add-each-gem",uploadGemFiles,AddEachGemController.AddEachGem)
+route.post("/add-each-gem", AddEachGemController.AddEachGem);
 route.post("/add-shape",AddShapeController.AddShape);
 route.post("/add-color",AddColorController.AddColor);
 route.post("/add-gem",uploadGemFiles,AddGemController.AddGem);
