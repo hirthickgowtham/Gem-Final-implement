@@ -10,6 +10,6 @@ import VerifyTokenMiddleware from "../middleware/AuthMiddleware/VerifyToken.midd
 export default function registerRoutes(app){
     app.use("/api/public",PublicRoute)
     app.use("/api/auth",AuthRoute);
-    app.use("/api/admin/public",VerifyTokenMiddleware.Verify_Token,PublicRoute)
-    app.use("/api/admin",AdminRoute)
+    app.use("/api/admin/public",VerifyTokenMiddleware.Verify_Token, PublicRoute)
+    app.use("/api/admin",VerifyTokenMiddleware.Verify_Token, AdminRoute)
 }
