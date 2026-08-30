@@ -34,6 +34,7 @@ const ColorBasedFilter = async (color_id, category, gem_id, page, limit) => {
         eg.each_gem_id,
         eg.lot_number,
         eg.crt,
+        eg.price,
         t.image AS thumbnail
     FROM each_gem_detail eg
     LEFT JOIN thumbnail t
@@ -70,6 +71,7 @@ const CrtBasedFilter = async (crt, category, gem_id, page, limit) => {
             eg.each_gem_id,
             eg.lot_number,
             eg.crt,
+            eg.price,
             t.image AS thumbnail
         FROM each_gem_detail eg
         LEFT JOIN thumbnail t

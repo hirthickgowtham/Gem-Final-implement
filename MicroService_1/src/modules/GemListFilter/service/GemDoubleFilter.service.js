@@ -41,6 +41,7 @@ const ShapeCrtFilter = async (gem_id, filter1, filter2, value1, value2, page, li
         eg.each_gem_id,
         eg.lot_number,
         eg.crt,
+        eg.price,
         t.image AS thumbnail
     FROM each_gem_detail eg
     LEFT JOIN thumbnail t
@@ -72,6 +73,7 @@ const ColorCrtFilter = async (gem_id, filter1, filter2, value1, value2, page, li
         eg.each_gem_id,
         eg.lot_number,
         eg.crt,
+        eg.price,
         t.image AS thumbnail
     FROM each_gem_detail eg
     LEFT JOIN thumbnail t

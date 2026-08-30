@@ -1,9 +1,13 @@
 import { Kafka } from "kafkajs";
+import os from "os";
 
 const brokers = process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(",").map(b => b.trim()) : ["localhost:9092"];
 
+// Dynamic unique clientId per instance/process with manual env override support
+const clientId = process.env.KAFKA_CLIENT_ID || `media-consumer-${os.hostname()}-${process.pid}`;
+
 const kafka = new Kafka({
-    clientId: "media-service",
+    clientId: clientId,
     brokers: brokers,
     connectionTimeout: 10000,
     requestTimeout: 30000,
@@ -14,7 +18,7 @@ const kafka = new Kafka({
 });
 
 const consumer = kafka.consumer({ 
-    groupId: "video-processing-group-v2",
+    groupId: process.env.KAFKA_GROUP_ID || "video-processing-group-v2",
     sessionTimeout: 60000,
     heartbeatInterval: 3000,
     rebalanceTimeout: 60000,
