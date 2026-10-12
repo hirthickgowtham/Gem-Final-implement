@@ -20,8 +20,11 @@ const GemList = async(req,res)=>{
              res.status(200).json(data);
         }
         catch(e){
-            console.log(`Error in API gateway controller ${e}`)
-            return sendresponse(res,500,false,`Gem fetching failed`,e);
+            console.log(`Error in API gateway controller:`, e.message);
+            if (e.response) {
+                return res.status(e.response.status).json(e.response.data);
+            }
+            return sendresponse(res,500,false,`Gem fetching failed`, e.message);
         }
 }
 

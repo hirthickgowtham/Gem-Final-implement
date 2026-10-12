@@ -14,8 +14,11 @@ const Gem_ThreeFilter = async(req,res)=>{
         
     }
     catch(error){
-        console.log("Error in Three Filter controller ",error);
-        res.status(500).json(error);
+        console.log("Error in Three Filter controller ", error.message);
+        if (error.response) {
+            return res.status(error.response.status).json(error.response.data);
+        }
+        return res.status(500).json({ success: false, message: "Internal Gateway Error", error: error.message });
     }
 }
 

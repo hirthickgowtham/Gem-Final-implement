@@ -17,7 +17,8 @@ const GemSingleFilterController = async (req,res) => {
         if(category === 1){
             if(filter === "shape_id"){
 
-                if(!ShapeIdCheck(value)){
+                const isShapeValid = await ShapeIdCheck(value);
+                if(!isShapeValid){
                     return sendResponse(res, 400, false, "Invalid shape_id provided");
                 }
             
@@ -27,7 +28,8 @@ const GemSingleFilterController = async (req,res) => {
 
             if(filter === "color_id"){
 
-                if(!ColorIdCheck(value)){
+                const isColorValid = await ColorIdCheck(value);
+                if(!isColorValid){
                     return sendResponse(res, 400, false, "Invalid color_id provided");
                 }
 

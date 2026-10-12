@@ -19,9 +19,11 @@ const Gem_SingleFilter = async(req,res) =>{
              res.status(200).json(data)
         }
         catch(error){   
-            console.log(`Error in SingleFilter API gateway`,error);
-            res.status(500).json(error);
-            // return sendresponse(res,500,false,`Failed Single Filter from API gateway with category : ${category} , Gem_id : ${gem_id} `,error)
+            console.log(`Error in SingleFilter API gateway`, error.message);
+            if (error.response) {
+                return res.status(error.response.status).json(error.response.data);
+            }
+            return res.status(500).json({ success: false, message: "Internal Gateway Error", error: error.message });
         }
 
 

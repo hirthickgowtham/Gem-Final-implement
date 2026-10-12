@@ -27,7 +27,10 @@ const Gem_DoubleFilter = async (req, res) => {
         return res.status(200).json(data);
 
     } catch (error) {
-        console.log("Controller error")
+        console.log("Controller error:", error.message);
+        if (error.response) {
+            return res.status(error.response.status).json(error.response.data);
+        }
 
         return res.status(500).json({
             message: "Gateway Double Filter Error",
